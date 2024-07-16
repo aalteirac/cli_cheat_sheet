@@ -1,5 +1,129 @@
 
-# Snowpark Container Services Cheat Sheet
+# Snowflake CLI Cheat Sheet
+
+## Credential Management Cheat Sheet
+
+### Adding Credentials
+
+1. **Using Snowflake CLI Connection Command**:
+   ```shell
+   snow connection add
+   ```
+   - Enter the required details when prompted (e.g., connection name, account name, username, etc.).
+   - Optional parameters: role, warehouse, database, schema, host, port, region.
+
+2. **Using Configuration File**:
+   - Edit the `config.toml` file, or create one if it doesn't exist.
+   - Add connection definitions:
+     ```toml
+     [connections.myconnection]
+     account = "myaccount"
+     user = "johndoe"
+     password = "hunter2"
+     warehouse = "my-wh"
+     database = "my_db"
+     schema = "my_schema"
+     ```
+   - Ensure file permissions are set correctly on MacOS/Linux:
+     ```shell
+     chown $USER config.toml
+     chmod 0600 config.toml
+     ```
+
+3. **Using Environment Variables**:
+   - Define environment variables:
+     ```shell
+     export SNOWFLAKE_ACCOUNT="myaccount"
+     export SNOWFLAKE_USER="johndoe"
+     export SNOWFLAKE_PASSWORD="hunter2"
+     ```
+   - For specific connection parameters:
+     ```shell
+     export SNOWFLAKE_CONNECTIONS_MYCONNECTION_ACCOUNT="myaccount"
+     ```
+
+### Changing the Default Connection
+
+- **In `config.toml`**:
+  ```toml
+  default_connection_name = "my_prod_connection"
+  ```
+- **Using Environment Variable**:
+  ```shell
+  export SNOWFLAKE_DEFAULT_CONNECTION_NAME="my_prod_connection"
+  ```
+- **Using CLI Command**:
+  ```shell
+  snow connection set-default "my_test_connection"
+  ```
+
+### Using a Private Key for Authentication
+
+- **Configuration**:
+  ```toml
+  [connections.jwt]
+  account = "my_account"
+  user = "johndoe"
+  authenticator = "SNOWFLAKE_JWT"
+  private_key_path = "~/sf_private_key.p8"
+  ```
+
+### Using Multi-Factor Authentication (MFA)
+
+- **Configuration**:
+  ```toml
+  authenticator = "snowflake"
+  ```
+- **Enable MFA Caching**:
+  ```toml
+  authenticator = "username_password_mfa"
+  ```
+
+### Using Single Sign-On (SSO)
+
+- **Refer to SSO Configuration Documentation**.
+
+### Testing and Temporary Connections
+
+1. **Test a Connection**:
+   ```shell
+   snow connection test --connection="myconnection"
+   ```
+
+2. **Using a Temporary Connection**:
+   ```shell
+   snow sql -q "select 42;" --temporary-connection \
+                             --account myaccount \
+                             --user jdoe
+   ```
+   - Temporary connection options:
+     ```shell
+     --account myaccount
+     --user jdoe
+     --password "mypassword"
+     --authenticator "auth_method"
+     --private-key-path "/path/to/private_key"
+     --database "dbname"
+     --schema "schemaname"
+     --role "rolename"
+     --warehouse "warehouse"
+     --temporary-connection [-x]
+     ```
+
+### Using a Different Configuration File
+
+- **Specify Configuration File**:
+  ```shell
+  snow --config-file="my_config.toml" connection test
+  ```
+
+### Important Notes
+
+- **MFA Requirement**: From Snowflake version 8.24, MFA can be mandatory.
+- **File Permissions**: Ensure correct permissions for `config.toml` and `connections.toml` on MacOS/Linux.
+
+
+# CLI for Snowpark Container Services 
 
 ## Image Registries
 
